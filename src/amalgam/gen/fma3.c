@@ -3599,21 +3599,22 @@ void xnn_f32_gemm_minmax_ukernel_5x16__fma3_broadcast(
       const __m256 va4 = _mm256_broadcast_ss(a4);
       a4 += 1;
 
-      const __m256 vb01234567 = _mm256_load_ps(w);
-      const __m256 vb89ABCDEF = _mm256_load_ps(w + 8);
-      w += 16;
+      __m256 vb01234567 = _mm256_load_ps(w);
 
       vacc0x01234567 = _mm256_fmadd_ps(va0, vb01234567, vacc0x01234567);
       vacc1x01234567 = _mm256_fmadd_ps(va1, vb01234567, vacc1x01234567);
       vacc2x01234567 = _mm256_fmadd_ps(va2, vb01234567, vacc2x01234567);
       vacc3x01234567 = _mm256_fmadd_ps(va3, vb01234567, vacc3x01234567);
       vacc4x01234567 = _mm256_fmadd_ps(va4, vb01234567, vacc4x01234567);
-      vacc0x89ABCDEF = _mm256_fmadd_ps(va0, vb89ABCDEF, vacc0x89ABCDEF);
-      vacc1x89ABCDEF = _mm256_fmadd_ps(va1, vb89ABCDEF, vacc1x89ABCDEF);
-      vacc2x89ABCDEF = _mm256_fmadd_ps(va2, vb89ABCDEF, vacc2x89ABCDEF);
-      vacc3x89ABCDEF = _mm256_fmadd_ps(va3, vb89ABCDEF, vacc3x89ABCDEF);
-      vacc4x89ABCDEF = _mm256_fmadd_ps(va4, vb89ABCDEF, vacc4x89ABCDEF);
 
+      vb01234567 = _mm256_load_ps(w + 8);
+      vacc0x89ABCDEF = _mm256_fmadd_ps(va0, vb01234567, vacc0x89ABCDEF);
+      vacc1x89ABCDEF = _mm256_fmadd_ps(va1, vb01234567, vacc1x89ABCDEF);
+      vacc2x89ABCDEF = _mm256_fmadd_ps(va2, vb01234567, vacc2x89ABCDEF);
+      vacc3x89ABCDEF = _mm256_fmadd_ps(va3, vb01234567, vacc3x89ABCDEF);
+      vacc4x89ABCDEF = _mm256_fmadd_ps(va4, vb01234567, vacc4x89ABCDEF);
+
+      w += 16;
       k -= sizeof(float);
     } while (k != 0);
 
