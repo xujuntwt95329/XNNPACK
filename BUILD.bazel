@@ -1061,6 +1061,7 @@ xnnpack_microkernel_cc_library(
         "-mf16c",
         "-mfma",
         "-mavx2",
+        "-mavxneconvert",
     ],
     msvc_copts = xnnpack_msvc_std_copts(),
     msvc_x86_32_copts = ["/arch:AVX2"],

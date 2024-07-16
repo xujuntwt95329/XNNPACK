@@ -96,13 +96,13 @@ void xnn_f16_igemm_minmax_ukernel_4x16__avx2_broadcast(
         const __m256 vb1 = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) ((const uint16_t*) w + 8)));
         w = (const uint16_t*) w + 16;
 
-        const __m256 va0 = _mm256_cvtph_ps(_mm_set1_epi16((short) *a0));
+        const __m256 va0 = _mm256_bcstnesh_ps((void *)a0);
         a0 += 1;
-        const __m256 va1 = _mm256_cvtph_ps(_mm_set1_epi16((short) *a1));
+        const __m256 va1 = _mm256_bcstnesh_ps((void *)a1);
         a1 += 1;
-        const __m256 va2 = _mm256_cvtph_ps(_mm_set1_epi16((short) *a2));
+        const __m256 va2 = _mm256_bcstnesh_ps((void *)a2);
         a2 += 1;
-        const __m256 va3 = _mm256_cvtph_ps(_mm_set1_epi16((short) *a3));
+        const __m256 va3 = _mm256_bcstnesh_ps((void *)a3);
         a3 += 1;
 
         vacc0x0 = _mm256_cvtph_ps(_mm256_cvtps_ph(_mm256_fmadd_ps(va0, vb0, vacc0x0), _MM_FROUND_TO_NEAREST_INT));

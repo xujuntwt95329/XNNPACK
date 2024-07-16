@@ -63,7 +63,7 @@ void xnn_f16_f32acc_igemm_minmax_ukernel_1x16__avx2_broadcast(
         const __m256 vb1 = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) ((const uint16_t*) w + 8)));
         w = (const uint16_t*) w + 16;
 
-        const __m256 va0 = _mm256_cvtph_ps(_mm_set1_epi16((short) *a0));
+        const __m256 va0 = _mm256_bcstnesh_ps((void *)a0);
         a0 += 1;
 
         vacc0x0 = _mm256_fmadd_ps(va0, vb0, vacc0x0);

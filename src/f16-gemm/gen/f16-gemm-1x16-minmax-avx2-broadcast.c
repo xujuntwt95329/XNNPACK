@@ -46,7 +46,7 @@ void xnn_f16_gemm_minmax_ukernel_1x16__avx2_broadcast(
 
     size_t k = kc;
     do {
-      const __m256 va0 = _mm256_cvtph_ps(_mm_set1_epi16((short) *a0));
+      const __m256 va0 = _mm256_bcstnesh_ps((void *)a0);
       a0 += 1;
 
       const __m256 vb0 = _mm256_cvtph_ps(_mm_load_si128((const __m128i*) w));
