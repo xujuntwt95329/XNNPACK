@@ -55,8 +55,8 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x8c8__avxvnni(
 
     size_t k = kc;
     while (k >= 16 * sizeof(int8_t)) {
-      const __m256i va0x01234567 = _mm256_xor_si256(_mm256_set1_epi64x((int64_t) unaligned_load_u64(a0)), vsign_mask);
-      const __m256i va0x89ABCDEF = _mm256_xor_si256(_mm256_set1_epi64x((int64_t) unaligned_load_u64(a0 + 8)), vsign_mask);
+      const __m256i va0x01234567 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(a0));
+      const __m256i va0x89ABCDEF = _mm256_set1_epi64x((int64_t) unaligned_load_u64(a0 + 8));
       a0 += 16;
 
       const __m256i vb01234567x0123 = _mm256_load_si256(w);
@@ -64,24 +64,24 @@ void xnn_qs8_qc8w_gemm_minmax_fp32_ukernel_1x8c8__avxvnni(
       const __m256i vb01234567x4567 = _mm256_load_si256((const __m256i*) ((const int8_t*) w + 64));
       const __m256i vb89ABCDEFx4567 = _mm256_load_si256((const __m256i*) ((const int8_t*) w + 96));
 
-      vacc0x0123 = _mm256_dpbusd_avx_epi32(vacc0x0123, va0x01234567, vb01234567x0123);
-      vacc0x4567 = _mm256_dpbusd_avx_epi32(vacc0x4567, va0x01234567, vb89ABCDEFx0123);
-      vacc1x0x0123 = _mm256_dpbusd_avx_epi32(vacc1x0x0123, va0x89ABCDEF, vb01234567x4567);
-      vacc1x0x4567 = _mm256_dpbusd_avx_epi32(vacc1x0x4567, va0x89ABCDEF, vb89ABCDEFx4567);
+      vacc0x0123 = _mm256_dpbssd_epi32(vacc0x0123, va0x01234567, vb01234567x0123);
+      vacc0x4567 = _mm256_dpbssd_epi32(vacc0x4567, va0x01234567, vb89ABCDEFx0123);
+      vacc1x0x0123 = _mm256_dpbssd_epi32(vacc1x0x0123, va0x89ABCDEF, vb01234567x4567);
+      vacc1x0x4567 = _mm256_dpbssd_epi32(vacc1x0x4567, va0x89ABCDEF, vb89ABCDEFx4567);
 
       w = (const int8_t*) w + 128;
       k -= 16 * sizeof(int8_t);
     }
 
     if (k != 0) {
-      const __m256i va0x01234567 = _mm256_xor_si256(_mm256_set1_epi64x((int64_t) unaligned_load_u64(a0)), vsign_mask);
+      const __m256i va0x01234567 = _mm256_set1_epi64x((int64_t) unaligned_load_u64(a0));
       a0 += 8;
 
       const __m256i vb01234567x0123 = _mm256_load_si256(w);
       const __m256i vb89ABCDEFx0123 = _mm256_load_si256((const __m256i*) ((const int8_t*) w + 32));
 
-      vacc0x0123 = _mm256_dpbusd_avx_epi32(vacc0x0123, va0x01234567, vb01234567x0123);
-      vacc0x4567 = _mm256_dpbusd_avx_epi32(vacc0x4567, va0x01234567, vb89ABCDEFx0123);
+      vacc0x0123 = _mm256_dpbssd_epi32(vacc0x0123, va0x01234567, vb01234567x0123);
+      vacc0x4567 = _mm256_dpbssd_epi32(vacc0x4567, va0x01234567, vb89ABCDEFx0123);
 
       w = (const int8_t*) w + 64;
       k -= 8 * sizeof(int8_t);
