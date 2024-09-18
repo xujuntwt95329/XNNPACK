@@ -11,12 +11,14 @@ $assert TYPE in ["int8_t"]
 #include <stddef.h>
 #include <stdint.h>
 
+#include <immintrin.h>
+
 #include "xnnpack/packw.h"
 
 $BITS = {"int8_t": 8, "uint16_t": 16, "uint32_t": 32, "float": 32}[TYPE]
 $BTYPE = {"int8_t": "int32_t", "uint16_t": "uint16_t", "uint32_t": "uint32_t", "float": "float"}[TYPE]
 $WTYPE = {"int8_t": "int8_t", "uint16_t": "uint16_t", "uint32_t": "uint32_t", "float": "uint32_t"}[TYPE]
-void xnn_qs${BITS}_packw_gemm_goi_ukernel_x${NR}c${KR}__avx2(
+void xnn_qs${BITS}_packw_gemm_goi_ukernel_x${NR}c${KR}__sse2(
   size_t g,
   size_t nc,
   size_t kc,
@@ -76,34 +78,36 @@ void xnn_qs${BITS}_packw_gemm_goi_ukernel_x${NR}c${KR}__avx2(
       $for N in range(1, NR):
         const ${TYPE}* w${N} = w${N-1} + kc;
       $if BITS == 8:
-        __m128i ksum = _mm_setzero_ps();
+        __m128i kzero = _mm_setzero_ps();
+        $for N in range(NR):
+          uint32_t ksum${N} = 0;
 
       // KC main loop multiple of ${NR}x${KR}
       size_t k = kc;
       for (; k >= ${KR}; k -= ${KR}) {
         $for N in range(NR):
-          const __m128i v${N}x${K} = _mm_loadl_epi64(w${N});
+          const __m128i v${N} = _mm_loadl_epi64((const __m128i *)w${N});
           $if BITS == 8:
-            _mm_add_epi8(ksum, v${N}x${K});
-          _mm_storel_epi64(out[${N*KR}], v${N}x${K})
+            ksum${N} += _mm_cvtsi128_si32(_mm_sad_epu8(v${N}, kzero));
+          _mm_storel_epi64((__m128i *)&out[${N*KR}], v${N});
           w${N} += ${KR};
         out += ${NR*KR};
       }
 
       // KC remainder 1..KR-1
       if (k != 0) {
-        // $for N in range(NR):
-        //   $for K in range(KR):
-        //     const ${TYPE} v${N}x${K} = ${K} < k ? w${N}[${K}] : izp;
-        //   $for K in range(KR):
-        //     $if BITS == 8:
-        //       ksum${N} += (uint32_t) v${N}x${K};
-        //   $for K in range(KR):
-        //     if (${K} < k) {
-        //       out[${N*KR+K}] = v${N}x${K};
-        //     }
-        //   w${N} += ${KR};
-        // out += ${NR*KR};
+        $for N in range(NR):
+          $for K in range(KR):
+            const ${TYPE} v${N}x${K} = ${K} < k ? w${N}[${K}] : izp;
+          $for K in range(KR):
+            $if BITS == 8:
+              ksum${N} += (uint32_t) v${N}x${K};
+          $for K in range(KR):
+            if (${K} < k) {
+              out[${N*KR+K}] = v${N}x${K};
+            }
+          w${N} += ${KR};
+        out += ${NR*KR};
       }
 
       $if BITS == 8:
