@@ -49,6 +49,7 @@ SET(PROD_SSE2_MICROKERNEL_SRCS
   src/qs8-f32-vcvt/gen/qs8-f32-vcvt-sse2-u32.c
   src/qs8-gavgpool/gen/qs8-gavgpool-7p7x-minmax-fp32-sse2-c8.c
   src/qs8-gavgpool/gen/qs8-gavgpool-7x-minmax-fp32-sse2-c8.c
+  src/qs8-packw/gen/qs8-packw-x8c8-gemm-goi-sse2.c
   src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-3p8c-minmax-fp32-sse2-mul16.c
   src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-9p8c-minmax-fp32-sse2-mul16.c
   src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-25p8c-minmax-fp32-sse2-mul16.c
@@ -219,7 +220,6 @@ SET(NON_PROD_SSE2_MICROKERNEL_SRCS
   src/qs8-gavgpool/gen/qs8-gavgpool-7p7x-minmax-fp32-sse2-c24.c
   src/qs8-gavgpool/gen/qs8-gavgpool-7x-minmax-fp32-sse2-c16.c
   src/qs8-gavgpool/gen/qs8-gavgpool-7x-minmax-fp32-sse2-c24.c
-  src/qs8-packw/gen/qs8-packw-x8c8-gemm-goi-sse2.c
   src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-5f5m5l8c8s8r-minmax-fp32-sse2-mul16-add16.c
   src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-5f5m5l8c8s8r-minmax-fp32-sse2-mul16.c
   src/qs8-qc8w-dwconv/gen/qs8-qc8w-dwconv-5f5m5l16c8s8r-minmax-fp32-sse2-mul16-add16.c
