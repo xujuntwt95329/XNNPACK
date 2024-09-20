@@ -26,4 +26,6 @@ tools/xngen src/x8-packw/kr-scalar.c.in -D NR=64 -D KR=4 -D TYPE=int8_t -o src/q
 
 tools/xngen src/x8-packw/kr-avx2.c.in -D NR=8 -D KR=8 -D TYPE=int8_t -o src/qs8-packw/gen/qs8-packw-x8c8-gemm-goi-sse2.c &
 
+tools/xngen src/x8-packw/kr-avxvnniint8.c.in -D NR=8 -D KR=8 -D TYPE=int8_t -o src/qs8-packw/gen/qs8-packw-x8c8-gemm-goi-avx2.c &
+
 wait
