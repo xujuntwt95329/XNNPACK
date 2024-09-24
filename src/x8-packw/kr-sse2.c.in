@@ -18,7 +18,7 @@ $assert TYPE in ["int8_t"]
 $BITS = {"int8_t": 8, "uint16_t": 16, "uint32_t": 32, "float": 32}[TYPE]
 $BTYPE = {"int8_t": "int32_t", "uint16_t": "uint16_t", "uint32_t": "uint32_t", "float": "float"}[TYPE]
 $WTYPE = {"int8_t": "int8_t", "uint16_t": "uint16_t", "uint32_t": "uint32_t", "float": "uint32_t"}[TYPE]
-void xnn_qs${BITS}_packw_gemm_goi_ukernel_x${NR}c${KR}__avx2(
+void xnn_qs${BITS}_packw_gemm_goi_ukernel_x${NR}c${KR}__sse2(
   size_t g,
   size_t nc,
   size_t kc,
@@ -47,9 +47,7 @@ void xnn_qs${BITS}_packw_gemm_goi_ukernel_x${NR}c${KR}__avx2(
   ${TYPE}* out = (${TYPE}*) packed_weights;
   const ${BTYPE}* b = (const ${BTYPE}*) bias;
   $if BITS == 8:
-    const int8_t izp = params ? ((const struct xnn_qs8_packw_params*) params)->input_zero_point : 0;
-    __m256i vacc = _mm256_setzero_si256();
-    __m256i vizp = _mm256_set1_epi8(izp);
+    const uint32_t izp = params ? (uint32_t) ((const struct xnn_qs8_packw_params*) params)->input_zero_point : 0;
 
   do {
     // NC main loop multiple of ${NR}
@@ -80,32 +78,19 @@ void xnn_qs${BITS}_packw_gemm_goi_ukernel_x${NR}c${KR}__avx2(
       $for N in range(1, NR):
         const ${TYPE}* w${N} = w${N-1} + kc;
       $if BITS == 8:
-        __m256i kzero = _mm256_setzero_si256();
+        __m128i kzero = _mm_setzero_ps();
         $for N in range(NR):
           uint32_t ksum${N} = 0;
 
       // KC main loop multiple of ${NR}x${KR}
       size_t k = kc;
-      __m256i vksum;
       for (; k >= ${KR}; k -= ${KR}) {
-        $for N in range(0, NR, 4):
-          __m256i v${N} = _mm256_castsi128_si256(_mm_loadl_epi64((const __m128i *)w${N}));
-          v${N} = _mm256_insert_epi64(v${N}, *(int64_t *)w${N + 1}, 1);
-          v${N} = _mm256_insert_epi64(v${N}, *(int64_t *)w${N + 2}, 2);
-          v${N} = _mm256_insert_epi64(v${N}, *(int64_t *)w${N + 3}, 3);
-
+        $for N in range(NR):
+          const __m128i v${N} = _mm_loadl_epi64((const __m128i *)w${N});
           $if BITS == 8:
-            vksum = _mm256_sad_epu8(v${N}, kzero);
-            // ksum${N} += _mm_cvtsi128_si32(_mm256_sad_epu8(v${N}, kzero));
-            $for O in range(4):
-              ksum${N + O} += _mm256_extract_epi32(vksum, ${O * 2});
-            
-            // _mm256_dpbssd_epi32(vacc, v${N}, 0);
-
-          _mm256_storeu_si256((__m256i *)&out[${N*KR}],  v${N});
-
-          $for O in range(4):
-            w${N + O} += ${KR};
+            ksum${N} += _mm_cvtsi128_si32(_mm_sad_epu8(v${N}, kzero));
+          _mm_storel_epi64((__m128i *)&out[${N*KR}], v${N});
+          w${N} += ${KR};
         out += ${NR*KR};
       }
 
