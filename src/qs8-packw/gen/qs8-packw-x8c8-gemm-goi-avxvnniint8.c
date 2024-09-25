@@ -44,7 +44,7 @@ void xnn_qs8_packw_gemm_goi_ukernel_x8c8__avxvnniint8(
   const int8_t izp = params ? ((const struct xnn_qs8_packw_params*) params)->input_zero_point : 0;
   __m256i vacc1 = _mm256_setzero_si256();
   __m256i vacc2 = _mm256_setzero_si256();
-  __m256i vizp = _mm256_set1_epi8(izp);
+  __m256i vone = _mm256_set1_epi8(1);
 
   do {
     // NC main loop multiple of 8
@@ -106,8 +106,8 @@ void xnn_qs8_packw_gemm_goi_ukernel_x8c8__avxvnniint8(
           v4567 = _mm256_insert_epi64(v4567, *(int64_t *)w6, 2);
           v4567 = _mm256_insert_epi64(v4567, *(int64_t *)w7, 3);
 
-          vacc1 = _mm256_dpbssd_epi32(vacc1, v0123, vizp);
-          vacc2 = _mm256_dpbssd_epi32(vacc2, v4567, vizp);
+          vacc1 = _mm256_dpbssd_epi32(vacc1, v0123, vone);
+          vacc2 = _mm256_dpbssd_epi32(vacc2, v4567, vone);
 
           _mm256_storeu_si256((__m256i *)&out[0],  v0123);
           _mm256_storeu_si256((__m256i *)&out[32],  v4567);
@@ -123,140 +123,364 @@ void xnn_qs8_packw_gemm_goi_ukernel_x8c8__avxvnniint8(
         out += 64;
       }
 
+      const __m256i vsum0x02134657 = _mm256_hadd_epi32(vacc1, vacc2);
+      __m256i vacc0x01234567 = _mm256_permute4x64_epi64(vsum0x02134657, _MM_SHUFFLE(3, 1, 2, 0));
+
+      ksum0 = _mm256_extract_epi32(vacc0x01234567, 0);
+      ksum1 = _mm256_extract_epi32(vacc0x01234567, 1);
+      ksum2 = _mm256_extract_epi32(vacc0x01234567, 2);
+      ksum3 = _mm256_extract_epi32(vacc0x01234567, 3);
+      ksum4 = _mm256_extract_epi32(vacc0x01234567, 4);
+      ksum5 = _mm256_extract_epi32(vacc0x01234567, 5);
+      ksum6 = _mm256_extract_epi32(vacc0x01234567, 6);
+      ksum7 = _mm256_extract_epi32(vacc0x01234567, 7);
+
       // KC remainder 1..KR-1
       if (k != 0) {
-        __m256i v0123 = vizp;
-        __m256i v4567 = vizp;
-
-        if (k & 4) {
-          v0123 = _mm256_insert_epi32(v0123, *(int32_t *)w0, 0);
-          v0123 = _mm256_insert_epi32(v0123, *(int32_t *)w1, 2);
-          v0123 = _mm256_insert_epi32(v0123, *(int32_t *)w2, 4);
-          v0123 = _mm256_insert_epi32(v0123, *(int32_t *)w3, 6);
-
-          v4567 = _mm256_insert_epi32(v4567, *(int32_t *)w0, 0);
-          v4567 = _mm256_insert_epi32(v4567, *(int32_t *)w5, 2);
-          v4567 = _mm256_insert_epi32(v4567, *(int32_t *)w6, 4);
-          v4567 = _mm256_insert_epi32(v4567, *(int32_t *)w7, 6);
-          w0 += 4;
-          w1 += 4;
-          w2 += 4;
-          w3 += 4;
-          w4 += 4;
-          w5 += 4;
-          w6 += 4;
-          w7 += 4;
+        const int8_t v0x0 = 0 < k ? w0[0] : izp;
+        const int8_t v0x1 = 1 < k ? w0[1] : izp;
+        const int8_t v0x2 = 2 < k ? w0[2] : izp;
+        const int8_t v0x3 = 3 < k ? w0[3] : izp;
+        const int8_t v0x4 = 4 < k ? w0[4] : izp;
+        const int8_t v0x5 = 5 < k ? w0[5] : izp;
+        const int8_t v0x6 = 6 < k ? w0[6] : izp;
+        const int8_t v0x7 = 7 < k ? w0[7] : izp;
+        ksum0 += (uint32_t) v0x0;
+        ksum0 += (uint32_t) v0x1;
+        ksum0 += (uint32_t) v0x2;
+        ksum0 += (uint32_t) v0x3;
+        ksum0 += (uint32_t) v0x4;
+        ksum0 += (uint32_t) v0x5;
+        ksum0 += (uint32_t) v0x6;
+        ksum0 += (uint32_t) v0x7;
+        if (0 < k) {
+          out[0] = v0x0;
         }
-        if (k & 2) {
-          if (k & 4) {
-            v0123 = _mm256_insert_epi16(v0123, *(int16_t *)w0, 2);
-            v0123 = _mm256_insert_epi16(v0123, *(int16_t *)w1, 6);
-            v0123 = _mm256_insert_epi16(v0123, *(int16_t *)w2, 10);
-            v0123 = _mm256_insert_epi16(v0123, *(int16_t *)w3, 14);
-
-            v4567 = _mm256_insert_epi16(v4567, *(int16_t *)w0, 2);
-            v4567 = _mm256_insert_epi16(v4567, *(int16_t *)w5, 6);
-            v4567 = _mm256_insert_epi16(v4567, *(int16_t *)w6, 10);
-            v4567 = _mm256_insert_epi16(v4567, *(int16_t *)w7, 14);
-          } else {
-            v0123 = _mm256_insert_epi16(v0123, *(int16_t *)w0, 0);
-            v0123 = _mm256_insert_epi16(v0123, *(int16_t *)w1, 4);
-            v0123 = _mm256_insert_epi16(v0123, *(int16_t *)w2, 8);
-            v0123 = _mm256_insert_epi16(v0123, *(int16_t *)w3, 12);
-
-            v4567 = _mm256_insert_epi16(v4567, *(int16_t *)w0, 0);
-            v4567 = _mm256_insert_epi16(v4567, *(int16_t *)w5, 4);
-            v4567 = _mm256_insert_epi16(v4567, *(int16_t *)w6, 8);
-            v4567 = _mm256_insert_epi16(v4567, *(int16_t *)w7, 12);
-          }
-
-          w0 += 2;
-          w1 += 2;
-          w2 += 2;
-          w3 += 2;
-          w4 += 2;
-          w5 += 2;
-          w6 += 2;
-          w7 += 2;
+        if (1 < k) {
+          out[1] = v0x1;
         }
-        if (k & 1) {
-          if ((k & 4) && (k & 2)) {
-            v0123 = _mm256_insert_epi8(v0123, *(int8_t *)w0, 6);
-            v0123 = _mm256_insert_epi8(v0123, *(int8_t *)w1, 14);
-            v0123 = _mm256_insert_epi8(v0123, *(int8_t *)w2, 22);
-            v0123 = _mm256_insert_epi8(v0123, *(int8_t *)w3, 30);
-
-            v4567 = _mm256_insert_epi8(v4567, *(int8_t *)w4, 6);
-            v4567 = _mm256_insert_epi8(v4567, *(int8_t *)w5, 14);
-            v4567 = _mm256_insert_epi8(v4567, *(int8_t *)w6, 22);
-            v4567 = _mm256_insert_epi8(v4567, *(int8_t *)w7, 30);
-          }
-          else if (k & 4) {
-            v0123 = _mm256_insert_epi8(v0123, *(int8_t *)w0, 4);
-            v0123 = _mm256_insert_epi8(v0123, *(int8_t *)w1, 12);
-            v0123 = _mm256_insert_epi8(v0123, *(int8_t *)w2, 20);
-            v0123 = _mm256_insert_epi8(v0123, *(int8_t *)w3, 28);
-
-            v4567 = _mm256_insert_epi8(v4567, *(int8_t *)w4, 4);
-            v4567 = _mm256_insert_epi8(v4567, *(int8_t *)w5, 12);
-            v4567 = _mm256_insert_epi8(v4567, *(int8_t *)w6, 20);
-            v4567 = _mm256_insert_epi8(v4567, *(int8_t *)w7, 28);
-          }
-          else if (k & 2) {
-            v0123 = _mm256_insert_epi8(v0123, *(int8_t *)w0, 2);
-            v0123 = _mm256_insert_epi8(v0123, *(int8_t *)w1, 10);
-            v0123 = _mm256_insert_epi8(v0123, *(int8_t *)w2, 18);
-            v0123 = _mm256_insert_epi8(v0123, *(int8_t *)w3, 26);
-
-            v4567 = _mm256_insert_epi8(v4567, *(int8_t *)w4, 2);
-            v4567 = _mm256_insert_epi8(v4567, *(int8_t *)w5, 10);
-            v4567 = _mm256_insert_epi8(v4567, *(int8_t *)w6, 18);
-            v4567 = _mm256_insert_epi8(v4567, *(int8_t *)w7, 26);
-          }
-          else {
-            v0123 = _mm256_insert_epi8(v0123, *(int8_t *)w0, 0);
-            v0123 = _mm256_insert_epi8(v0123, *(int8_t *)w1, 8);
-            v0123 = _mm256_insert_epi8(v0123, *(int8_t *)w2, 16);
-            v0123 = _mm256_insert_epi8(v0123, *(int8_t *)w3, 24);
-
-            v4567 = _mm256_insert_epi8(v4567, *(int8_t *)w4, 0);
-            v4567 = _mm256_insert_epi8(v4567, *(int8_t *)w5, 8);
-            v4567 = _mm256_insert_epi8(v4567, *(int8_t *)w6, 16);
-            v4567 = _mm256_insert_epi8(v4567, *(int8_t *)w7, 24);
-          }
-          
-          w0 += 1;
-          w1 += 1;
-          w2 += 1;
-          w3 += 1;
-          w4 += 1;
-          w5 += 1;
-          w6 += 1;
-          w7 += 1;
+        if (2 < k) {
+          out[2] = v0x2;
         }
-
-        vacc1 = _mm256_dpbssd_epi32(vacc1, v0123, vizp);
-        vacc2 = _mm256_dpbssd_epi32(vacc2, v4567, vizp);
-
-        _mm256_storeu_si256((__m256i *)&out[0],  v0123);
-        _mm256_storeu_si256((__m256i *)&out[32],  v4567);
-
+        if (3 < k) {
+          out[3] = v0x3;
+        }
+        if (4 < k) {
+          out[4] = v0x4;
+        }
+        if (5 < k) {
+          out[5] = v0x5;
+        }
+        if (6 < k) {
+          out[6] = v0x6;
+        }
+        if (7 < k) {
+          out[7] = v0x7;
+        }
         w0 += 8;
+        const int8_t v1x0 = 0 < k ? w1[0] : izp;
+        const int8_t v1x1 = 1 < k ? w1[1] : izp;
+        const int8_t v1x2 = 2 < k ? w1[2] : izp;
+        const int8_t v1x3 = 3 < k ? w1[3] : izp;
+        const int8_t v1x4 = 4 < k ? w1[4] : izp;
+        const int8_t v1x5 = 5 < k ? w1[5] : izp;
+        const int8_t v1x6 = 6 < k ? w1[6] : izp;
+        const int8_t v1x7 = 7 < k ? w1[7] : izp;
+        ksum1 += (uint32_t) v1x0;
+        ksum1 += (uint32_t) v1x1;
+        ksum1 += (uint32_t) v1x2;
+        ksum1 += (uint32_t) v1x3;
+        ksum1 += (uint32_t) v1x4;
+        ksum1 += (uint32_t) v1x5;
+        ksum1 += (uint32_t) v1x6;
+        ksum1 += (uint32_t) v1x7;
+        if (0 < k) {
+          out[8] = v1x0;
+        }
+        if (1 < k) {
+          out[9] = v1x1;
+        }
+        if (2 < k) {
+          out[10] = v1x2;
+        }
+        if (3 < k) {
+          out[11] = v1x3;
+        }
+        if (4 < k) {
+          out[12] = v1x4;
+        }
+        if (5 < k) {
+          out[13] = v1x5;
+        }
+        if (6 < k) {
+          out[14] = v1x6;
+        }
+        if (7 < k) {
+          out[15] = v1x7;
+        }
         w1 += 8;
+        const int8_t v2x0 = 0 < k ? w2[0] : izp;
+        const int8_t v2x1 = 1 < k ? w2[1] : izp;
+        const int8_t v2x2 = 2 < k ? w2[2] : izp;
+        const int8_t v2x3 = 3 < k ? w2[3] : izp;
+        const int8_t v2x4 = 4 < k ? w2[4] : izp;
+        const int8_t v2x5 = 5 < k ? w2[5] : izp;
+        const int8_t v2x6 = 6 < k ? w2[6] : izp;
+        const int8_t v2x7 = 7 < k ? w2[7] : izp;
+        ksum2 += (uint32_t) v2x0;
+        ksum2 += (uint32_t) v2x1;
+        ksum2 += (uint32_t) v2x2;
+        ksum2 += (uint32_t) v2x3;
+        ksum2 += (uint32_t) v2x4;
+        ksum2 += (uint32_t) v2x5;
+        ksum2 += (uint32_t) v2x6;
+        ksum2 += (uint32_t) v2x7;
+        if (0 < k) {
+          out[16] = v2x0;
+        }
+        if (1 < k) {
+          out[17] = v2x1;
+        }
+        if (2 < k) {
+          out[18] = v2x2;
+        }
+        if (3 < k) {
+          out[19] = v2x3;
+        }
+        if (4 < k) {
+          out[20] = v2x4;
+        }
+        if (5 < k) {
+          out[21] = v2x5;
+        }
+        if (6 < k) {
+          out[22] = v2x6;
+        }
+        if (7 < k) {
+          out[23] = v2x7;
+        }
         w2 += 8;
+        const int8_t v3x0 = 0 < k ? w3[0] : izp;
+        const int8_t v3x1 = 1 < k ? w3[1] : izp;
+        const int8_t v3x2 = 2 < k ? w3[2] : izp;
+        const int8_t v3x3 = 3 < k ? w3[3] : izp;
+        const int8_t v3x4 = 4 < k ? w3[4] : izp;
+        const int8_t v3x5 = 5 < k ? w3[5] : izp;
+        const int8_t v3x6 = 6 < k ? w3[6] : izp;
+        const int8_t v3x7 = 7 < k ? w3[7] : izp;
+        ksum3 += (uint32_t) v3x0;
+        ksum3 += (uint32_t) v3x1;
+        ksum3 += (uint32_t) v3x2;
+        ksum3 += (uint32_t) v3x3;
+        ksum3 += (uint32_t) v3x4;
+        ksum3 += (uint32_t) v3x5;
+        ksum3 += (uint32_t) v3x6;
+        ksum3 += (uint32_t) v3x7;
+        if (0 < k) {
+          out[24] = v3x0;
+        }
+        if (1 < k) {
+          out[25] = v3x1;
+        }
+        if (2 < k) {
+          out[26] = v3x2;
+        }
+        if (3 < k) {
+          out[27] = v3x3;
+        }
+        if (4 < k) {
+          out[28] = v3x4;
+        }
+        if (5 < k) {
+          out[29] = v3x5;
+        }
+        if (6 < k) {
+          out[30] = v3x6;
+        }
+        if (7 < k) {
+          out[31] = v3x7;
+        }
         w3 += 8;
+        const int8_t v4x0 = 0 < k ? w4[0] : izp;
+        const int8_t v4x1 = 1 < k ? w4[1] : izp;
+        const int8_t v4x2 = 2 < k ? w4[2] : izp;
+        const int8_t v4x3 = 3 < k ? w4[3] : izp;
+        const int8_t v4x4 = 4 < k ? w4[4] : izp;
+        const int8_t v4x5 = 5 < k ? w4[5] : izp;
+        const int8_t v4x6 = 6 < k ? w4[6] : izp;
+        const int8_t v4x7 = 7 < k ? w4[7] : izp;
+        ksum4 += (uint32_t) v4x0;
+        ksum4 += (uint32_t) v4x1;
+        ksum4 += (uint32_t) v4x2;
+        ksum4 += (uint32_t) v4x3;
+        ksum4 += (uint32_t) v4x4;
+        ksum4 += (uint32_t) v4x5;
+        ksum4 += (uint32_t) v4x6;
+        ksum4 += (uint32_t) v4x7;
+        if (0 < k) {
+          out[32] = v4x0;
+        }
+        if (1 < k) {
+          out[33] = v4x1;
+        }
+        if (2 < k) {
+          out[34] = v4x2;
+        }
+        if (3 < k) {
+          out[35] = v4x3;
+        }
+        if (4 < k) {
+          out[36] = v4x4;
+        }
+        if (5 < k) {
+          out[37] = v4x5;
+        }
+        if (6 < k) {
+          out[38] = v4x6;
+        }
+        if (7 < k) {
+          out[39] = v4x7;
+        }
         w4 += 8;
+        const int8_t v5x0 = 0 < k ? w5[0] : izp;
+        const int8_t v5x1 = 1 < k ? w5[1] : izp;
+        const int8_t v5x2 = 2 < k ? w5[2] : izp;
+        const int8_t v5x3 = 3 < k ? w5[3] : izp;
+        const int8_t v5x4 = 4 < k ? w5[4] : izp;
+        const int8_t v5x5 = 5 < k ? w5[5] : izp;
+        const int8_t v5x6 = 6 < k ? w5[6] : izp;
+        const int8_t v5x7 = 7 < k ? w5[7] : izp;
+        ksum5 += (uint32_t) v5x0;
+        ksum5 += (uint32_t) v5x1;
+        ksum5 += (uint32_t) v5x2;
+        ksum5 += (uint32_t) v5x3;
+        ksum5 += (uint32_t) v5x4;
+        ksum5 += (uint32_t) v5x5;
+        ksum5 += (uint32_t) v5x6;
+        ksum5 += (uint32_t) v5x7;
+        if (0 < k) {
+          out[40] = v5x0;
+        }
+        if (1 < k) {
+          out[41] = v5x1;
+        }
+        if (2 < k) {
+          out[42] = v5x2;
+        }
+        if (3 < k) {
+          out[43] = v5x3;
+        }
+        if (4 < k) {
+          out[44] = v5x4;
+        }
+        if (5 < k) {
+          out[45] = v5x5;
+        }
+        if (6 < k) {
+          out[46] = v5x6;
+        }
+        if (7 < k) {
+          out[47] = v5x7;
+        }
         w5 += 8;
+        const int8_t v6x0 = 0 < k ? w6[0] : izp;
+        const int8_t v6x1 = 1 < k ? w6[1] : izp;
+        const int8_t v6x2 = 2 < k ? w6[2] : izp;
+        const int8_t v6x3 = 3 < k ? w6[3] : izp;
+        const int8_t v6x4 = 4 < k ? w6[4] : izp;
+        const int8_t v6x5 = 5 < k ? w6[5] : izp;
+        const int8_t v6x6 = 6 < k ? w6[6] : izp;
+        const int8_t v6x7 = 7 < k ? w6[7] : izp;
+        ksum6 += (uint32_t) v6x0;
+        ksum6 += (uint32_t) v6x1;
+        ksum6 += (uint32_t) v6x2;
+        ksum6 += (uint32_t) v6x3;
+        ksum6 += (uint32_t) v6x4;
+        ksum6 += (uint32_t) v6x5;
+        ksum6 += (uint32_t) v6x6;
+        ksum6 += (uint32_t) v6x7;
+        if (0 < k) {
+          out[48] = v6x0;
+        }
+        if (1 < k) {
+          out[49] = v6x1;
+        }
+        if (2 < k) {
+          out[50] = v6x2;
+        }
+        if (3 < k) {
+          out[51] = v6x3;
+        }
+        if (4 < k) {
+          out[52] = v6x4;
+        }
+        if (5 < k) {
+          out[53] = v6x5;
+        }
+        if (6 < k) {
+          out[54] = v6x6;
+        }
+        if (7 < k) {
+          out[55] = v6x7;
+        }
         w6 += 8;
+        const int8_t v7x0 = 0 < k ? w7[0] : izp;
+        const int8_t v7x1 = 1 < k ? w7[1] : izp;
+        const int8_t v7x2 = 2 < k ? w7[2] : izp;
+        const int8_t v7x3 = 3 < k ? w7[3] : izp;
+        const int8_t v7x4 = 4 < k ? w7[4] : izp;
+        const int8_t v7x5 = 5 < k ? w7[5] : izp;
+        const int8_t v7x6 = 6 < k ? w7[6] : izp;
+        const int8_t v7x7 = 7 < k ? w7[7] : izp;
+        ksum7 += (uint32_t) v7x0;
+        ksum7 += (uint32_t) v7x1;
+        ksum7 += (uint32_t) v7x2;
+        ksum7 += (uint32_t) v7x3;
+        ksum7 += (uint32_t) v7x4;
+        ksum7 += (uint32_t) v7x5;
+        ksum7 += (uint32_t) v7x6;
+        ksum7 += (uint32_t) v7x7;
+        if (0 < k) {
+          out[56] = v7x0;
+        }
+        if (1 < k) {
+          out[57] = v7x1;
+        }
+        if (2 < k) {
+          out[58] = v7x2;
+        }
+        if (3 < k) {
+          out[59] = v7x3;
+        }
+        if (4 < k) {
+          out[60] = v7x4;
+        }
+        if (5 < k) {
+          out[61] = v7x5;
+        }
+        if (6 < k) {
+          out[62] = v7x6;
+        }
+        if (7 < k) {
+          out[63] = v7x7;
+        }
         w7 += 8;
-
         out += 64;
       }
 
-      const __m256i vsum0x02134657 = _mm256_hadd_epi32(vacc1, vacc2);
-      __m256i vacc0x01234567 = _mm256_permute4x64_epi64(vsum0x02134657, _MM_SHUFFLE(3, 1, 2, 0));
-      __m256i vpack =  _mm256_loadu_si256((const __m256i*) packed_b);
-      _mm256_storeu_si256((__m256i *)packed_b, _mm256_sub_epi32(vpack, vacc0x01234567));
+      // const __m256i vsum0x02134657 = _mm256_hadd_epi32(vacc1, vacc2);
+      // __m256i vacc0x01234567 = _mm256_permute4x64_epi64(vsum0x02134657, _MM_SHUFFLE(3, 1, 2, 0));
+      // __m256i vpack =  _mm256_loadu_si256((const __m256i*) packed_b);
+      // _mm256_storeu_si256((__m256i *)packed_b, _mm256_sub_epi32(vpack, vacc0x01234567));
+      packed_b[0] -= ksum0 * izp;
+      packed_b[1] -= ksum1 * izp;
+      packed_b[2] -= ksum2 * izp;
+      packed_b[3] -= ksum3 * izp;
+      packed_b[4] -= ksum4 * izp;
+      packed_b[5] -= ksum5 * izp;
+      packed_b[6] -= ksum6 * izp;
+      packed_b[7] -= ksum7 * izp;
+
       out = (int8_t*) ((uintptr_t) out + extra_bytes);
       w0 = w7;
     }
