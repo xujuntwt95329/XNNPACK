@@ -1381,6 +1381,13 @@ static void ruy_st(benchmark::State& state, const char* net)
       /*mr=*/5, /*nr=*/8, /*kr=*/1, /*sr=*/1,
       benchmark::utils::CheckFMA3);
   }
+  static void f32_gemm_5x8c2__avx2_broadcast(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_f32_gemm_minmax_ukernel_5x8c2__avx2_broadcast,
+      xnn_init_f32_minmax_scalar_params,
+      /*mr=*/5, /*nr=*/8, /*kr=*/2, /*sr=*/1,
+      benchmark::utils::CheckFMA3);
+  }
   static void f32_gemm_6x8__fma3_broadcast(benchmark::State& state, const char* net) {
     GEMMBenchmark(state,
       xnn_f32_gemm_minmax_ukernel_6x8__fma3_broadcast,
@@ -1428,6 +1435,13 @@ static void ruy_st(benchmark::State& state, const char* net)
       xnn_f32_gemm_minmax_ukernel_5x16__fma3_broadcast,
       xnn_init_f32_minmax_scalar_params,
       /*mr=*/5, /*nr=*/16, /*kr=*/1, /*sr=*/1,
+      benchmark::utils::CheckFMA3);
+  }
+  static void f32_gemm_5x16c2__avx2_broadcast(benchmark::State& state, const char* net) {
+    GEMMBenchmark(state,
+      xnn_f32_gemm_minmax_ukernel_5x16c2__avx2_broadcast,
+      xnn_init_f32_minmax_scalar_params,
+      /*mr=*/5, /*nr=*/16, /*kr=*/2, /*sr=*/1,
       benchmark::utils::CheckFMA3);
   }
   static void f32_gemm_6x16__fma3_broadcast(benchmark::State& state, const char* net) {
@@ -1658,6 +1672,7 @@ static void ruy_st(benchmark::State& state, const char* net)
   BENCHMARK_GEMM(f32_gemm_1x8__fma3_broadcast)
   BENCHMARK_GEMM(f32_gemm_4x8__fma3_broadcast)
   BENCHMARK_GEMM(f32_gemm_5x8__fma3_broadcast)
+  BENCHMARK_GEMM(f32_gemm_5x8c2__avx2_broadcast)
   BENCHMARK_GEMM(f32_gemm_6x8__fma3_broadcast)
   BENCHMARK_GEMM(f32_gemm_7x8__fma3_broadcast)
   BENCHMARK_GEMM(f32_gemm_8x8__fma3_broadcast)
@@ -1665,6 +1680,7 @@ static void ruy_st(benchmark::State& state, const char* net)
   BENCHMARK_GEMM(f32_gemm_3x16__fma3_broadcast)
   BENCHMARK_GEMM(f32_gemm_4x16__fma3_broadcast)
   BENCHMARK_GEMM(f32_gemm_5x16__fma3_broadcast)
+  BENCHMARK_GEMM(f32_gemm_5x16c2__avx2_broadcast)
   BENCHMARK_GEMM(f32_gemm_6x16__fma3_broadcast)
 
   BENCHMARK_GEMM(f32_gemm_1x16s4__fma3_broadcast)

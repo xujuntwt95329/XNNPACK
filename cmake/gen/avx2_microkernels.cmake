@@ -19,6 +19,10 @@ SET(PROD_AVX2_MICROKERNEL_SRCS
   src/f16-raddstoreexpminusmax/gen/f16-raddstoreexpminusmax-avx2-rr1-p2-u32.c
   src/f16-velu/gen/f16-velu-avx2-rr1-p3-u16.c
   src/f16-vsigmoid/gen/f16-vsigmoid-avx2-rr1-p2-rcp-u32.c
+  src/f32-gemm/gen/f32-gemm-1x16c2-minmax-avx2-broadcast.c
+  src/f32-gemm/gen/f32-gemm-5x16c2-minmax-avx2-broadcast.c
+  src/f32-igemm/gen/f32-igemm-1x16c2-minmax-avx2-broadcast.c
+  src/f32-igemm/gen/f32-igemm-5x16c2-minmax-avx2-broadcast-prfm.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-1x16-minmax-avx2-broadcast.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-3x16-minmax-avx2-broadcast.c
   src/f32-qc8w-gemm/gen/f32-qc8w-gemm-1x16-minmax-avx2-broadcast.c
@@ -174,6 +178,9 @@ SET(NON_PROD_AVX2_MICROKERNEL_SRCS
   src/f16-vtanh/gen/f16-vtanh-avx2-expm1minus-rr1-p3h2ts-rcp-u64.c
   src/f16-vtanh/gen/f16-vtanh-avx2-expm1minus-rr1-p3h2ts-rcp-u72.c
   src/f16-vtanh/gen/f16-vtanh-avx2-expm1minus-rr1-p3h2ts-rcp-u80.c
+  src/f32-gemm/gen/f32-gemm-1x8c2-minmax-avx2-broadcast.c
+  src/f32-gemm/gen/f32-gemm-5x8c2-minmax-avx2-broadcast.c
+  src/f32-igemm/gen/f32-igemm-1x8c2-minmax-avx2-broadcast.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-2x16-minmax-avx2-broadcast.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-4x16-minmax-avx2-broadcast.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-5x16-minmax-avx2-broadcast.c

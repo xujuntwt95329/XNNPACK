@@ -64,6 +64,20 @@ XNN_INTERNAL void xnn_pack_f32_gemm_goi_w(
   size_t extra_bytes,
   const void* params);
 
+XNN_INTERNAL void xnn_pack_f32_c2_gemm_goi_w(
+  size_t g,
+  size_t nc,
+  size_t kc,
+  size_t nr,
+  size_t kr,
+  size_t sr,
+  const float* kernel,
+  const float* bias,
+  const void* scale,
+  float* packed_weights,
+  size_t extra_bytes,
+  const void* params);
+
 typedef void (*xnn_pack_f16_gemm_fn)(
   size_t g,
   size_t nc,

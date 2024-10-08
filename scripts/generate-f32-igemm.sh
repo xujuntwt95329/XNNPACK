@@ -352,6 +352,12 @@ tools/xngen src/f32-igemm/avx-shuffle4.c.in -D MR=4 -D NR=16 -D FMA=3 -o src/f32
 tools/xngen src/f32-igemm/avx-shuffle4.c.in -D MR=5 -D NR=16 -D FMA=3 -o src/f32-igemm/gen/f32-igemm-5x16s4-minmax-fma3-broadcast.c &
 tools/xngen src/f32-igemm/avx-shuffle4.c.in -D MR=6 -D NR=16 -D FMA=3 -o src/f32-igemm/gen/f32-igemm-6x16s4-minmax-fma3-broadcast.c &
 
+### AVX2+BROADCAST C2 micro-kernels
+tools/xngen src/f32-igemm/c2-avx-broadcast.c.in -D MR=1 -D NR=8  -D AVX=2 -D FMA=3 -D INC=0 -D DATATYPE=F32 -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-1x8c2-minmax-avx2-broadcast.c &
+tools/xngen src/f32-igemm/c2-avx-broadcast.c.in -D MR=1 -D NR=8  -D AVX=2 -D FMA=3 -D INC=0 -D DATATYPE=F32 -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-1x8c2-minmax-avx2-broadcast.c &
+# tools/xngen src/f32-igemm/c2-avx-broadcast.c.in -D MR=1 -D NR=16  -D AVX=2 -D FMA=3 -D INC=0 -D DATATYPE=F32 -D PREFETCH=0 -o src/f32-igemm/gen/f32-igemm-1x16c2-minmax-avx2-broadcast.c &
+# tools/xngen src/f32-igemm/c2-avx-broadcast.c.in -D MR=5 -D NR=16  -D AVX=2 -D FMA=3 -D INC=0 -D DATATYPE=F32 -D PREFETCH=1 -o src/f32-igemm/gen/f32-igemm-5x16c2-minmax-avx2-broadcast-prfm.c &
+
 ################################# x86 AVX-512 #################################
 ### AVX512F+BROADCAST micro-kernels
 tools/xngen src/f32-igemm/avx512-broadcast.c.in -D MR=1 -D NR=16 -o src/f32-igemm/gen/f32-igemm-1x16-minmax-avx512f-broadcast.c &
