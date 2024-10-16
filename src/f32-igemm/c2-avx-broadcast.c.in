@@ -15,7 +15,7 @@ $if PREFETCH:
 
 
 $ISA = {0: "avx", 3: "fma3"}[FMA]
-void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}c2__${ISA}_broadcast${"_prfm" if PREFETCH else ""}(
+void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}c2__avx2_broadcast${"_prfm" if PREFETCH else ""}(
     size_t mr,
     size_t nc,
     size_t kc,
@@ -89,11 +89,11 @@ void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}c2__${ISA}_broadcast${"_prfm" if PR
 
       size_t k = kc;
       while (k >= 2 * sizeof(float)) {
-        $for W in range(0, 2, 1):
-          const __m256 vb${W}x${ABC[0:4]}c2 = _mm256_load_ps(w);
-          $for N in range(8, NR, 8):
-            const __m256 vb${W}x${ABC[N//2:(N+8)//2]}c2 = _mm256_load_ps(w + ${N});
-          w += ${NR};
+        $for N in range(0, NR, 8):
+          const __m256 vb${N//8}x${ABC[0:4]}c2 = _mm256_load_ps(w);
+          const __m256 vb${N//8}x${ABC[4:8]}c2 = _mm256_load_ps(w + 8);
+          w += 16;
+
         $if PREFETCH:
           xnn_prefetch_to_l1(w + 224);
 
@@ -105,7 +105,7 @@ void xnn_f32_igemm_minmax_ukernel_${MR}x${NR}c2__${ISA}_broadcast${"_prfm" if PR
           $for M in range(MR):
             $for K in range(0, 2):
               $if FMA == 3:
-                vacc${M}x${ABC[N+4*K:N+4*K+4]}c2 = _mm256_fmadd_ps(va${M}, vb${int(N/8)}x${ABC[N+4*K:N+4*K+4]}c2, vacc${M}x${ABC[N+4*K:N+4*K+4]}c2);
+                vacc${M}x${ABC[N+4*K:N+4*K+4]}c2 = _mm256_fmadd_ps(va${M}, vb${int(N/8)}x${ABC[4*K:4*K+4]}c2, vacc${M}x${ABC[N+4*K:N+4*K+4]}c2);
       
               k -= 2 * sizeof(float);
       }

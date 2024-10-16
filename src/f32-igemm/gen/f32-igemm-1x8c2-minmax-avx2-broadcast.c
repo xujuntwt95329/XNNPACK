@@ -65,15 +65,15 @@ void xnn_f32_igemm_minmax_ukernel_1x8c2__avx2_broadcast(
       size_t k = kc;
       while (k >= 2 * sizeof(float)) {
         const __m256 vb0x0123c2 = _mm256_load_ps(w);
-        w += 8;
-        const __m256 vb1x0123c2 = _mm256_load_ps(w);
-        w += 8;
+        const __m256 vb0x4567c2 = _mm256_load_ps(w + 8);
+        w += 16;
+
 
         const __m256 va0 = _mm256_castsi256_ps(_mm256_set1_epi64x(*(int64_t *)a0));
         a0 += 2;
 
         vacc0x0123c2 = _mm256_fmadd_ps(va0, vb0x0123c2, vacc0x0123c2);
-        vacc0x4567c2 = _mm256_fmadd_ps(va0, vb1x0123c2, vacc0x4567c2);
+        vacc0x4567c2 = _mm256_fmadd_ps(va0, vb0x4567c2, vacc0x4567c2);
       
               k -= 2 * sizeof(float);
       }

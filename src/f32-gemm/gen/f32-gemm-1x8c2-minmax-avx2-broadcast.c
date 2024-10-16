@@ -56,12 +56,11 @@ void xnn_f32_gemm_minmax_ukernel_1x8c2__avx2_broadcast(
       a0 += 2;
 
       const __m256 vb0x0123c2 = _mm256_load_ps(w);
-      w += 8;
-      const __m256 vb1x0123c2 = _mm256_load_ps(w);
-      w += 8;
+      const __m256 vb0x4567c2 = _mm256_load_ps(w + 8);
+      w += 16;
 
       vacc0x0123c2 = _mm256_fmadd_ps(va0, vb0x0123c2, vacc0x0123c2);
-      vacc0x4567c2 = _mm256_fmadd_ps(va0, vb1x0123c2, vacc0x4567c2);
+      vacc0x4567c2 = _mm256_fmadd_ps(va0, vb0x4567c2, vacc0x4567c2);
       
       k -= 2 * sizeof(float);
     }
