@@ -532,6 +532,10 @@
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_f32_conv_goki_w
   k-block: 1
+- name: xnn_f32_igemm_minmax_ukernel_5x8c2__avx2_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_conv_goki_w
+  k-block: 2
 - name: xnn_f32_igemm_minmax_ukernel_5x16__fma3_broadcast
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_f32_conv_goki_w

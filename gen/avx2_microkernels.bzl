@@ -178,6 +178,7 @@ NON_PROD_AVX2_MICROKERNEL_SRCS = [
     "src/f32-gemm/gen/f32-gemm-1x8c2-minmax-avx2-broadcast.c",
     "src/f32-gemm/gen/f32-gemm-5x8c2-minmax-avx2-broadcast.c",
     "src/f32-igemm/gen/f32-igemm-1x8c2-minmax-avx2-broadcast.c",
+    "src/f32-igemm/gen/f32-igemm-5x8c2-minmax-avx2-broadcast.c",
     "src/f32-qc4w-gemm/gen/f32-qc4w-gemm-2x16-minmax-avx2-broadcast.c",
     "src/f32-qc4w-gemm/gen/f32-qc4w-gemm-4x16-minmax-avx2-broadcast.c",
     "src/f32-qc4w-gemm/gen/f32-qc4w-gemm-5x16-minmax-avx2-broadcast.c",
