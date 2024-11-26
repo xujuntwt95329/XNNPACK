@@ -184,6 +184,7 @@ SET(NON_PROD_FMA3_MICROKERNEL_SRCS
   src/f32-igemm/gen/f32-igemm-3x16s4-minmax-fma3-broadcast.c
   src/f32-igemm/gen/f32-igemm-4x8-minmax-fma3-broadcast.c
   src/f32-igemm/gen/f32-igemm-4x16-minmax-fma3-broadcast.c
+  src/f32-igemm/gen/f32-igemm-4x24-minmax-fma3-broadcast.c
   src/f32-igemm/gen/f32-igemm-5x8-minmax-fma3-broadcast.c
   src/f32-igemm/gen/f32-igemm-5x16-minmax-fma3-broadcast.c
   src/f32-igemm/gen/f32-igemm-5x16s4-minmax-fma3-broadcast.c
@@ -193,6 +194,12 @@ SET(NON_PROD_FMA3_MICROKERNEL_SRCS
   src/f32-igemm/gen/f32-igemm-6x16s4-minmax-fma3-broadcast.c
   src/f32-igemm/gen/f32-igemm-7x8-minmax-fma3-broadcast.c
   src/f32-igemm/gen/f32-igemm-8x8-minmax-fma3-broadcast.c
+  src/f32-igemm/gen/f32-igemm-9x8-minmax-fma3-broadcast.c
+  src/f32-igemm/gen/f32-igemm-10x8-minmax-fma3-broadcast.c
+  src/f32-igemm/gen/f32-igemm-11x8-minmax-fma3-broadcast.c
+  src/f32-igemm/gen/f32-igemm-12x8-minmax-fma3-broadcast.c
+  src/f32-igemm/gen/f32-igemm-13x8-minmax-fma3-broadcast.c
+  src/f32-igemm/gen/f32-igemm-14x8-minmax-fma3-broadcast.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-2x16-minmax-fma3-broadcast.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-4x16-minmax-fma3-broadcast.c
   src/f32-qc4w-gemm/gen/f32-qc4w-gemm-5x16-minmax-fma3-broadcast.c

@@ -552,6 +552,34 @@
   init: xnn_init_f32_minmax_scalar_params
   pack: xnn_pack_f32_conv_goki_w
   k-block: 1
+- name: xnn_f32_igemm_minmax_ukernel_4x24__fma3_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_conv_goki_w
+  k-block: 1
+- name: xnn_f32_igemm_minmax_ukernel_9x8__fma3_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_conv_goki_w
+  k-block: 1
+- name: xnn_f32_igemm_minmax_ukernel_10x8__fma3_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_conv_goki_w
+  k-block: 1
+- name: xnn_f32_igemm_minmax_ukernel_11x8__fma3_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_conv_goki_w
+  k-block: 1
+- name: xnn_f32_igemm_minmax_ukernel_12x8__fma3_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_conv_goki_w
+  k-block: 1
+- name: xnn_f32_igemm_minmax_ukernel_13x8__fma3_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_conv_goki_w
+  k-block: 1
+- name: xnn_f32_igemm_minmax_ukernel_14x8__fma3_broadcast
+  init: xnn_init_f32_minmax_scalar_params
+  pack: xnn_pack_f32_conv_goki_w
+  k-block: 1
 # x86 AVX512
 - name: xnn_f32_igemm_minmax_ukernel_1x16__avx512f_broadcast
   init: xnn_init_f32_minmax_scalar_params
