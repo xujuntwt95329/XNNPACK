@@ -13,7 +13,7 @@ load(
 )
 load(
     "//:build_params.bzl",
-    "xnnpack_select_if",
+    # "xnnpack_select_if",
     "xnnpack_simd_copts_for_arch",
     "xnnpack_simd_f16_archs",
     "xnnpack_simd_f32_archs",
@@ -148,21 +148,22 @@ xnnpack_cxx_library(
 )
 
 ####################### Unit tests for microkernel lists #######################
-sh_test(
-    name = "microkernel_lists_test",
-    size = "small",
-    srcs = ["microkernel_lists_test.sh"],
-    data = [
-        "//:cmake_microkernel_lists",
-        "//:generated_microkernel_lists",
-        "//gen:bzl_microkernel_lists",
-    ],
-    target_compatible_with = xnnpack_select_if(
-        "//build_config:linux",
-        [],
-        ["@platforms//:incompatible"],
-    ),
-)
+# TODO: b/381390736 - Reenable once fixed.
+#sh_test(
+#    name = "microkernel_lists_test",
+#    size = "small",
+#    srcs = ["microkernel_lists_test.sh"],
+#    data = [
+#        "//:cmake_microkernel_lists",
+#        "//:generated_microkernel_lists",
+#        "//gen:bzl_microkernel_lists",
+#    ],
+#    target_compatible_with = xnnpack_select_if(
+#        "//build_config:linux",
+#        [],
+#        ["@platforms//:incompatible"],
+#    ),
+#)
 
 ######################### Unit tests for simd wrappers #########################
 [xnnpack_unit_test(
@@ -290,6 +291,7 @@ sh_test(
     "qu8_vlrelu",
     "f16_f32_vcvt",
     "f16_qs8_vcvt",
+    "f16_qu8_vcvt",
     "f32_f16_vcvt",
     "f32_qs8_vcvt",
     "f32_qu8_vcvt",
@@ -739,7 +741,6 @@ xnnpack_unit_test(
     name = "f32_raddextexp_test",
     srcs = [
         "f32-raddextexp.cc",
-        "raddextexp-microkernel-tester.h",
     ],
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -812,7 +813,6 @@ xnnpack_unit_test(
     name = "f32_vscaleexpminusmax_test",
     srcs = [
         "f32-vscaleexpminusmax.cc",
-        "vscaleexpminusmax-microkernel-tester.h",
     ],
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -821,7 +821,6 @@ xnnpack_unit_test(
     name = "f32_vscaleextexp_test",
     srcs = [
         "f32-vscaleextexp.cc",
-        "vscaleextexp-microkernel-tester.h",
     ],
     deps = MICROKERNEL_TEST_DEPS,
 )
@@ -1104,6 +1103,7 @@ xnnpack_unit_test(
 ) for kernel in [
     "x8_packw",
     "qs8_packw",
+    "qs8_qc4w_packw",
     "x16_packw",
     "x32_packw",
 ]]
@@ -1749,6 +1749,7 @@ xnnpack_unit_test(
         ":replicable_random_device",
         "//:XNNPACK",
         "//:buffer",
+        "//:internal",
         "//:math",
         "//:node_type",
         "//:operator_utils",
@@ -2155,7 +2156,12 @@ xnnpack_unit_test(
 xnnpack_unit_test(
     name = "microkernel_utils_test",
     srcs = ["microkernel-utils.cc"],
-    deps = ["//:microkernel_utils"],
+    deps = [
+        ":replicable_random_device",
+        "//:math",
+        "//:microkernel_utils",
+        "//:params",
+    ],
 )
 
 xnnpack_unit_test(

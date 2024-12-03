@@ -169,7 +169,11 @@ void GemmMicrokernelTester::Test(
     }
     std::shuffle(im2col.begin(), im2col.end(), rng);
     const size_t k_stride =  round_up_po2(k(), kr() * sr());
-    xnnpack::Buffer<int8_t> zero_points(k_stride + XNN_EXTRA_BYTES, quantization_params[0].zero_point);
+    int32_t zp = quantization_params[0].zero_point;
+    if (unsigned_inputs()) {
+      zp += 128;
+    }
+    xnnpack::Buffer<int8_t> zero_points(k_stride + XNN_EXTRA_BYTES, zp);
     const int8_t* zero_sentinel = (const int8_t*) &packing_params;
     const int8_t* zero_data = zero_points.data();
     if (zero_index() != SIZE_MAX) {
@@ -219,6 +223,17 @@ void GemmMicrokernelTester::Test(
       }
     }
 
+    if (unsigned_inputs()) {
+      // Some architectures require that the input be unsigned.
+      // Adjust the zero point and flip the sign of the input to mimic adding
+      // 128 to the input with correct overflow behaviour.
+      for (int i = 0; i < quantization_params.size(); ++i) {
+        quantization_params[i].zero_point += 128;
+      }
+      for (int i = 0; i < a.size(); ++i) {
+        a[i] ^= 0x80;
+      }
+    }
     igemm(m(), n(), k(), ks() * mr() * sizeof(void*),
         im2col.data(), static_cast<const void*>(packed_w.data()),
         c.data(), cm_stride() * sizeof(xnn_float16), cn_stride() * sizeof(xnn_float16),
@@ -262,7 +277,6 @@ void GemmMicrokernelTester::Test(
       ks() * packed_n() * packed_k() +
       packed_n() * (sizeof(int32_t) + sizeof(float) * 2));
   xnnpack::Buffer<float> c((mr() - 1) * cm_stride() + ((n() - 1) / nr()) * cn_stride() + (n() - 1) % nr() + 1);
-  xnnpack::Buffer<int32_t> acc(m() * n());
   xnnpack::Buffer<float> c_ref(m() * n(), 0);
   xnnpack::Buffer<int8_t> junk(k() + XNN_EXTRA_BYTES / sizeof(int8_t));
   xnnpack::Buffer<const int8_t*> im2col(mr() * ks());
@@ -319,7 +333,11 @@ void GemmMicrokernelTester::Test(
     }
     std::shuffle(im2col.begin(), im2col.end(), rng);
     const size_t k_stride =  round_up_po2(k(), kr() * sr());
-    xnnpack::Buffer<int8_t> zero_points(k_stride + XNN_EXTRA_BYTES, quantization_params[0].zero_point);
+    int32_t zp = quantization_params[0].zero_point;
+    if (unsigned_inputs()) {
+      zp += 128;
+    }
+    xnnpack::Buffer<int8_t> zero_points(k_stride + XNN_EXTRA_BYTES, zp);
     const int8_t* zero_sentinel = (const int8_t*) &packing_params;
     const int8_t* zero_data = zero_points.data();
     if (zero_index() != SIZE_MAX) {
@@ -369,6 +387,17 @@ void GemmMicrokernelTester::Test(
       }
     }
 
+    if (unsigned_inputs()) {
+      // Some architectures require that the input be unsigned.
+      // Adjust the zero point and flip the sign of the input to mimic adding
+      // 128 to the input with correct overflow behaviour.
+      for (int i = 0; i < quantization_params.size(); ++i) {
+        quantization_params[i].zero_point += 128;
+      }
+      for (int i = 0; i < a.size(); ++i) {
+        a[i] ^= 0x80;
+      }
+    }
     igemm(m(), n(), k(), ks() * mr() * sizeof(void*),
         im2col.data(), static_cast<const void*>(packed_w.data()),
         c.data(), cm_stride() * sizeof(float), cn_stride() * sizeof(float),
@@ -381,7 +410,6 @@ void GemmMicrokernelTester::Test(
         const float tolerance = std::max(1.0e-5f, std::abs(c_ref[i * n() + j]) * 1.0e-6f);
         EXPECT_NEAR(c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()], c_ref[i * n() + j], tolerance)
             << "at " << i << ", " << j << ": reference = " << c_ref[i * n() + j]
-            << " (accumulator = " << acc[i * n() + j]
             << "), optimized = " << c[i * cm_stride() + (j / nr()) * cn_stride() + j % nr()] << ", Mr x Nr x Kr = " << mr() << " x "
             << nr() << " x " << kr() << ", M x N x K = " << m() << " x " << n() << " x " << k();
       }
@@ -935,6 +963,17 @@ void GemmMicrokernelTester::Test(
       }
     }
 
+    if (unsigned_inputs()) {
+      // Some architectures require that the input be unsigned.
+      // Adjust the zero point and flip the sign of the input to mimic adding
+      // 128 to the input with correct overflow behaviour.
+      for (int i = 0; i < quantization_params.size(); ++i) {
+        quantization_params[i].zero_point += 128;
+      }
+      for (int i = 0; i < a.size(); ++i) {
+        a[i] ^= 0x80;
+      }
+    }
     gemm(m(), n(), k(),
         a.data(), a_stride() * sizeof(int8_t),
         static_cast<const void*>(packed_w.data()),
@@ -1065,6 +1104,17 @@ void GemmMicrokernelTester::Test(
       }
     }
 
+    if (unsigned_inputs()) {
+      // Some architectures require that the input be unsigned.
+      // Adjust the zero point and flip the sign of the input to mimic adding
+      // 128 to the input with correct overflow behaviour.
+      for (int i = 0; i < quantization_params.size(); ++i) {
+        quantization_params[i].zero_point += 128;
+      }
+      for (int i = 0; i < a.size(); ++i) {
+        a[i] ^= 0x80;
+      }
+    }
     gemm(m(), n(), k(),
         a.data(), a_stride() * sizeof(int8_t),
         static_cast<const void*>(packed_w.data()),
@@ -1201,6 +1251,17 @@ void GemmMicrokernelTester::Test(
       }
     }
 
+    if (unsigned_inputs()) {
+      // Some architectures require that the input be unsigned.
+      // Adjust the zero point and flip the sign of the input to mimic adding
+      // 128 to the input with correct overflow behaviour.
+      for (int i = 0; i < quantization_params.size(); ++i) {
+        quantization_params[i].zero_point += 128;
+      }
+      for (int i = 0; i < a.size(); ++i) {
+        a[i] ^= 0x80;
+      }
+    }
     gemm(m(), n(), k2,
         a.data(), a_stride() * sizeof(int8_t),
         static_cast<const void*>(packed_w.data()),
@@ -1499,6 +1560,17 @@ void GemmMicrokernelTester::Test(
       }
     }
 
+    if (unsigned_inputs()) {
+      // Some architectures require that the input be unsigned.
+      // Adjust the zero point and flip the sign of the input to mimic adding
+      // 128 to the input with correct overflow behaviour.
+      for (int i = 0; i < quantization_params.size(); ++i) {
+        quantization_params[i].zero_point += 128;
+      }
+      for (int i = 0; i < a.size(); ++i) {
+        a[i] ^= 0x80;
+      }
+    }
     gemm(m(), n(), k2,
         a.data(), a_stride() * sizeof(int8_t),
         static_cast<const void*>(packed_w.data()),
@@ -1656,6 +1728,17 @@ void GemmMicrokernelTester::Test(
       }
     }
 
+    if (unsigned_inputs()) {
+      // Some architectures require that the input be unsigned.
+      // Adjust the zero point and flip the sign of the input to mimic adding
+      // 128 to the input with correct overflow behaviour.
+      for (int i = 0; i < quantization_params.size(); ++i) {
+        quantization_params[i].zero_point += 128;
+      }
+      for (int i = 0; i < a.size(); ++i) {
+        a[i] ^= 0x80;
+      }
+    }
     gemm(m(), n(), k2,
         a.data(), a_stride() * sizeof(int8_t),
         static_cast<const void*>(packed_w.data()),

@@ -453,6 +453,13 @@ struct xnn_f16_qs8_cvt_params {
   } scalar;
 };
 
+struct xnn_f16_qu8_cvt_params {
+  struct {
+    xnn_float16 scale;
+    int16_t output_zero_point;
+  } scalar;
+};
+
 struct xnn_f32_qs8_cvt_params {
   struct {
     float scale;
@@ -564,6 +571,11 @@ struct xnn_qu8_lrelu_params {
 
 struct xnn_qs8_packw_params {
   int8_t input_zero_point;
+};
+
+struct xnn_qs8_qc4w_packing_params {
+  int8_t input_zero_point;
+  uint8_t kernel_zero_point;
 };
 
 struct xnn_x32_packb_params {
